@@ -172,12 +172,34 @@ elif menu == "🧩 Clustering Produk":
 # ════════════════════════════════════════════════════════════════════════════
 elif menu == "📉 Evaluasi Model":
     st.title("📉 Evaluasi Model")
+
+    import json
+
+    def load_metrics(path):
+        if os.path.exists(path):
+            with open(path) as f:
+                return json.load(f)
+        return None
+
+    m_lin = load_metrics("metrics_linear.json")
+    m_for = load_metrics("metrics_forest.json")
+
+    def fmt(val, suffix=""):
+        return f"{val}{suffix}" if val is not None else "—"
+
     metrics = {
-        "Model":["Linear Regression","Random Forest"],
-        "R²":   ["—","—"], "RMSE":["—","—"],
-        "MAE":  ["—","—"], "MAPE":["—","—"],
+        "Model": ["Linear Regression", "Random Forest"],
+        "R²":    [fmt(m_lin["R2"] if m_lin else None),   fmt(m_for["R2"] if m_for else None)],
+        "RMSE":  [fmt(m_lin["RMSE"] if m_lin else None), fmt(m_for["RMSE"] if m_for else None)],
+        "MAE":   [fmt(m_lin["MAE"] if m_lin else None),  fmt(m_for["MAE"] if m_for else None)],
+        "MAPE":  [fmt(m_lin["MAPE"] if m_lin else None, "%"), fmt(m_for["MAPE"] if m_for else None, "%")],
     }
-    st.info("Jalankan LINEAR_mod.py dan FOREST_mod.py lalu refresh untuk melihat metrik.")
+
+    if m_lin is None or m_for is None:
+        st.info("⚠️ Jalankan LINEAR_mod.py dan FOREST_mod.py lalu refresh untuk melihat metrik.")
+    else:
+        st.success("✅ Metrics berhasil dimuat dari hasil training!")
+
     st.subheader("Perbandingan Metrik Model")
     st.table(pd.DataFrame(metrics))
 
